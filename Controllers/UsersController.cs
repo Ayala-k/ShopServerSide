@@ -43,32 +43,50 @@ namespace serverSide.Controllers
                             str += $"{reader["Name"]} - {reader["Id"]}";
                         }
                     }
-                    //kdjknsjkndjksn
                 }
 
             }
             return Ok(str);
         }
 
-    //    [HttpGet("{id}")]
-    //    public IActionResult GetUserById(Guid id)
-    //    {
-    //        var user = _context.Users.FirstOrDefault(u => u.Id == id);
-    //        if (user == null)
-    //        {
-    //            return NotFound();
-    //        }
-    //        return Ok(user);
-    //    }
+        [HttpGet("{id}")]
+        public IActionResult GetUserById(string id)
+        {
+            string connection_str = "Server=localhost; Database=shop_db;  UID=root;  PWD=1135;";
 
-    //    [HttpPost]
-    //    public IActionResult CreateUser(User user)
-    //    {
-    //        user.Id = Guid.NewGuid(); // Generate a new GUID for the user
-    //        _context.Users.Add(user);
-    //        _context.SaveChanges();
-    //        return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
-    //    }
+            //var users = _context.Users.ToList();
+            string str = "";
+
+            using (MySqlConnection connection = new MySqlConnection(connection_str))
+            {
+                connection.Open();
+                Console.WriteLine("Hello, World!");
+
+                using (MySqlCommand command = new MySqlCommand($"SELECT * FROM users WHERE Id={id}", connection))
+                {
+
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            Console.WriteLine($"{reader["Name"]} - {reader["Id"]}");
+                            str += $"{reader["Name"]} - {reader["Id"]}";
+                        }
+                    }
+                }
+
+            }
+            return Ok(str);
+        }
+
+        //    [HttpPost]
+        //    public IActionResult CreateUser(User user)
+        //    {
+        //        user.Id = Guid.NewGuid(); // Generate a new GUID for the user
+        //        _context.Users.Add(user);
+        //        _context.SaveChanges();
+        //        return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
+        //    }
     }
 }
 
