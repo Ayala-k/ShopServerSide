@@ -43,7 +43,7 @@ namespace serverSide.Controllers
                             str += $"{reader["Name"]} - {reader["Id"]}";
                         }
                     }
-
+                    //kdjknsjkndjksn
                 }
 
             }
