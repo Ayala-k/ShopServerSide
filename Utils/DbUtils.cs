@@ -9,7 +9,7 @@ namespace serverSide.Utils
     {
         private static readonly string connectionString = "Server=localhost; Database=shop_db;  UID=root;  PWD=1135;";
 
-        public static List<T> ExecuteQuery<T>(string query) where T : new()
+        public static List<T> ExecuteSelectQuery<T>(string query) where T : new()
         {
             List<T> results = new List<T>();
 

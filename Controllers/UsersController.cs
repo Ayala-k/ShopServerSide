@@ -14,7 +14,7 @@ namespace serverSide.Controllers
         public IActionResult GetAllUsers()
         {
             string query = "SELECT * FROM users";
-            List<User> users = DbUtils.ExecuteQuery<User>(query);
+            List<User> users = DbUtils.ExecuteSelectQuery<User>(query);
             return Ok(users);
         }
 
@@ -23,7 +23,7 @@ namespace serverSide.Controllers
         public IActionResult GetUserById(string id)
         {
             string query = $"SELECT * FROM users WHERE Id={id}";
-            List<User> user = DbUtils.ExecuteQuery<User>(query);
+            List<User> user = DbUtils.ExecuteSelectQuery<User>(query);
             return Ok(user);
         }
         
