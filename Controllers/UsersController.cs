@@ -31,6 +31,7 @@ namespace serverSide.Controllers
         [HttpPost("signup")]
         public IActionResult SignUp(User user)
         {
+            user.Role=Roles.Customer;
             string hashedPassword= PasswordHashUtil.HashPassword(user.Password);
             string query = $"INSERT INTO users (Id, Name, Role, Password) VALUES ('{user.Id}', '{user.Name}', '{user.Role}','{hashedPassword}')";
             DbUtils.ExecuteNonQuery(query);

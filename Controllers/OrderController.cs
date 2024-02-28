@@ -13,10 +13,10 @@ namespace serverSide.Controllers
         [HttpPost]
         public IActionResult CreateOrder(Order order)
         {
-            order.Status = "order recieved";
+            order.Status = OrderStatus.OrderRecieved;
 
             //insert order
-            string orderQuery = $"INSERT INTO orders (id, CustomerId,Status) VALUES ('{order.Id}','{order.CustomerId}','{order.Status}')";
+            string orderQuery = $"INSERT INTO orders (id, CustomerId,Status) VALUES ('{order.Id}','{order.CustomerId}','{order.Status.ToString()}')";
             DbUtils.ExecuteNonQuery(orderQuery);
 
             //insert order items
@@ -40,6 +40,7 @@ namespace serverSide.Controllers
 
             return Ok("Order created successfully");
         }
+
 
         [HttpGet("{customerId}")]
         public IActionResult GetCustomersOrders(string customerId)
