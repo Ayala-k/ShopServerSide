@@ -7,11 +7,10 @@ namespace serverSide.Utils
 {
     public static class DbUtils
     {
+        private static readonly string connectionString = "Server=localhost; Database=shop_db;  UID=root;  PWD=1135;";
+
         public static List<T> ExecuteQuery<T>(string query) where T : new()
         {
-            //string connectionString = Configuration.GetConnectionString("DBConnection");
-            string connectionString = "Server=localhost; Database=shop_db;  UID=root;  PWD=1135;";
-            
             List<T> results = new List<T>();
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
@@ -32,6 +31,19 @@ namespace serverSide.Utils
             }
 
             return results;
+        }
+
+        public static void ExecuteNonQuery(string query)
+        {
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    command.ExecuteNonQuery();
+                }
+            }
         }
 
         public static T MapToObject<T>(MySqlDataReader reader) where T : new()
