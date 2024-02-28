@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using serverSide.Models;
 using serverSide.Utils;
 using System.Collections.Generic;
@@ -9,7 +10,6 @@ namespace serverSide.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-
         [HttpGet]
         public IActionResult GetAllUsers()
         {
@@ -36,6 +36,7 @@ namespace serverSide.Controllers
             DbUtils.ExecuteNonQuery(query);
             return Ok("User added successfully");
         }
+
 
         [HttpPost("login")]
         public IActionResult LogIn(UserLogIn user)

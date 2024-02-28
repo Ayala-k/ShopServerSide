@@ -21,9 +21,7 @@ namespace serverSide
 
         public void ConfigureServices(IServiceCollection services)
         {
-            // Add DbContext and connection string
-            //services.AddDbContext<MyDbContext>(options =>
-            //    options.UseMySQL(Configuration.GetConnectionString("DBConnection")));
+
 
             // Add Swagger generator
             services.AddSwaggerGen(c =>
@@ -33,6 +31,9 @@ namespace serverSide
 
             // Add MVC services
             services.AddControllersWithViews();
+
+
+
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
