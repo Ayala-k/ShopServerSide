@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using serverSide.Data;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using System.Data.Entity;
 
 namespace serverSide
 {
@@ -24,8 +24,6 @@ namespace serverSide
             // Add DbContext and connection string
             //services.AddDbContext<MyDbContext>(options =>
             //    options.UseMySQL(Configuration.GetConnectionString("DBConnection")));
-
-
 
             // Add Swagger generator
             services.AddSwaggerGen(c =>
