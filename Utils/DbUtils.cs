@@ -103,6 +103,10 @@ namespace serverSide.Utils
                         {
                             value = (OrderStatus)Enum.Parse(typeof(OrderStatus), value.ToString());
                         }
+                        if (typeof(T) == typeof(Item))
+                        {
+                            value = (InstrumentalCategory)Enum.Parse(typeof(InstrumentalCategory), value.ToString());
+                        }
                         //if (prop.PropertyType.IsEnum)
                         //{
                         //    // Convert the value to the enum type

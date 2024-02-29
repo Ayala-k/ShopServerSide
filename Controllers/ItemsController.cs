@@ -10,7 +10,7 @@ namespace serverSide.Controllers
     [ApiController]
     public class ItemsController : ControllerBase
     {
-        [Authorize]
+        //[Authorize]
         [HttpGet]
         public IActionResult GetAllItems()
         {
@@ -32,7 +32,7 @@ namespace serverSide.Controllers
         [HttpPost]
         public IActionResult AddItem(Item item)
         {
-            string query = $"INSERT INTO items (Name, Description, Price) VALUES ('{item.Name}', '{item.Description}', '{item.Price}')";
+            string query = $"INSERT INTO items (Name, Description, Price, Category) VALUES ('{item.Name}', '{item.Description}', '{item.Price}', '{item.Category}')";
             DbUtils.ExecuteNonQuery(query);
             return Ok("Item added successfully");
         }
@@ -41,7 +41,7 @@ namespace serverSide.Controllers
         [HttpPut("{id}")]
         public IActionResult UpdateItem(int id, Item item)
         {
-            string query = $"UPDATE items SET Name='{item.Name}', Description='{item.Description}', Price='{item.Price}' WHERE Id={id}";
+            string query = $"UPDATE items SET Name='{item.Name}', Description='{item.Description}', Price='{item.Price}', Category='{item.Category}' WHERE Id={id}";
             DbUtils.ExecuteNonQuery(query);
             return Ok("Item updated successfully");
         }
