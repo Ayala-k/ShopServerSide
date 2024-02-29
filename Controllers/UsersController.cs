@@ -13,6 +13,7 @@ namespace serverSide.Controllers
         [HttpGet]
         public IActionResult GetAllUsers()
         {
+
             string query = "SELECT * FROM users";
             List<User> users = DbUtils.ExecuteSelectQuery<User>(query);
             return Ok(users);

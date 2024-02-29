@@ -8,7 +8,7 @@ namespace serverSide.Utils
 {
     public static class DbUtils
     {
-        private static readonly string connectionString = "Server=localhost; Database=shop_db;  UID=root;  PWD=1135;";
+        private static readonly string connectionString = Environment.GetEnvironmentVariable("ConnectionString");
 
         public static List<T> ExecuteSelectQuery<T>(string query) where T : new()
         {
