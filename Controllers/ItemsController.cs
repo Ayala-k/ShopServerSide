@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using serverSide.Models;
 using serverSide.Utils;
@@ -9,6 +10,7 @@ namespace serverSide.Controllers
     [ApiController]
     public class ItemsController : ControllerBase
     {
+        [Authorize]
         [HttpGet]
         public IActionResult GetAllItems()
         {
