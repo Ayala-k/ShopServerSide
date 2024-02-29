@@ -94,7 +94,6 @@ namespace serverSide.Utils
                     }
                     catch (System.InvalidCastException ex)
                     {
-                        Console.WriteLine(typeof(T));
                         if (typeof(T) == typeof(User))
                         {
                             value = (Roles)Enum.Parse(typeof(Roles), value.ToString());

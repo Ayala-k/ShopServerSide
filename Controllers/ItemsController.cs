@@ -10,7 +10,7 @@ namespace serverSide.Controllers
     [ApiController]
     public class ItemsController : ControllerBase
     {
-        //[Authorize]
+        [Authorize]
         [HttpGet]
         public IActionResult GetAllItems()
         {

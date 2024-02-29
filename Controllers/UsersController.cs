@@ -86,7 +86,13 @@ namespace serverSide.Controllers
             new Claim(ClaimTypes.NameIdentifier, userId.ToString())
                 }),
                 Expires = DateTime.UtcNow.AddHours(1),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
+                // Add audience and issuer claims
+                Claims = new Dictionary<string, object>
+        {
+            { JwtRegisteredClaimNames.Aud, _configuration["Jwt:Audience"] },
+            { JwtRegisteredClaimNames.Iss, _configuration["Jwt:Issuer"] }
+        }
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);

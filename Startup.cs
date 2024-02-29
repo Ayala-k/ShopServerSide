@@ -27,7 +27,6 @@ namespace serverSide
             });
 
             // Add MVC services
-            services.AddControllersWithViews();
 
             // Configure JWT authentication
             services.AddAuthentication(options =>
@@ -36,17 +35,23 @@ namespace serverSide
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(options =>
             {
+                Console.WriteLine("in auth");
+
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
+
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
+
                     ValidIssuer = Configuration["Jwt:Issuer"],
                     ValidAudience = Configuration["Jwt:Audience"],
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]))
                 };
             });
+            services.AddControllersWithViews();
+
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -64,10 +69,13 @@ namespace serverSide
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
+
+            app.UseAuthentication();
+
+
             app.UseRouting();
 
             // Enable authentication middleware
-            app.UseAuthentication();
 
             app.UseAuthorization();
 
