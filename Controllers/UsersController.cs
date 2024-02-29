@@ -20,7 +20,7 @@ namespace serverSide.Controllers
 
 
         [HttpGet("{id}")]
-        public IActionResult GetUserById(string id)
+        public IActionResult GetUserById(int id)
         {
             string query = $"SELECT * FROM users WHERE Id={id}";
             List<User> user = DbUtils.ExecuteSelectQuery<User>(query);
@@ -33,9 +33,16 @@ namespace serverSide.Controllers
         {
             user.Role=Roles.Customer;
             string hashedPassword= PasswordHashUtil.HashPassword(user.Password);
-            string query = $"INSERT INTO users (Id, Name, Role, Password) VALUES ('{user.Id}', '{user.Name}', '{user.Role}','{hashedPassword}')";
-            DbUtils.ExecuteNonQuery(query);
-            return Ok("User added successfully");
+            string query = $"INSERT INTO users (Name, Role, Password) VALUES ('{user.Name}', '{user.Role}','{hashedPassword}')";
+            try
+            {
+                DbUtils.ExecuteNonQuery(query);
+                return Ok("User added successfully");
+            }
+            catch (MySql.Data.MySqlClient.MySqlException ex)
+            {
+                return Conflict("User name already exists");
+            }
         }
 
 
@@ -51,24 +58,24 @@ namespace serverSide.Controllers
             }
             else
             {
-                return Unauthorized();
+                return Unauthorized("Wrong user name or password");
             }
         }
 
 
         [HttpPut("{id}")]
-        public IActionResult UpdateUser(string id, User user)//not includes password change!
+        public IActionResult UpdateUser(int id, User user)//not includes password change!
         {
-            string query = $"UPDATE users SET Name='{user.Name}', Role='{user.Role}' WHERE Id='{id}'";
+            string query = $"UPDATE users SET Name='{user.Name}', Role='{user.Role}' WHERE Id={id}";
             DbUtils.ExecuteNonQuery(query);
             return Ok("User updated successfully");
         }
 
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteUser(string id)
+        public IActionResult DeleteUser(int id)
         {
-            string query = $"DELETE FROM users WHERE Id='{id}'";
+            string query = $"DELETE FROM users WHERE Id={id}";
             DbUtils.ExecuteNonQuery(query);
             return Ok("User deleted successfully");
         }

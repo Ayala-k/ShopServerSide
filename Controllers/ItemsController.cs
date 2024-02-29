@@ -19,9 +19,9 @@ namespace serverSide.Controllers
 
 
         [HttpGet("{id}")]
-        public IActionResult GetItemById(string id)
+        public IActionResult GetItemById(int id)
         {
-            string query = $"SELECT * FROM items WHERE Id='{id}'";
+            string query = $"SELECT * FROM items WHERE Id={id}";
             List<Item> item = DbUtils.ExecuteSelectQuery<Item>(query);
             return Ok(item);
         }
@@ -30,25 +30,25 @@ namespace serverSide.Controllers
         [HttpPost]
         public IActionResult AddItem(Item item)
         {
-            string query = $"INSERT INTO items (Id, Name, Description, Price) VALUES ('{item.Id}', '{item.Name}', '{item.Description}', '{item.Price}')";
+            string query = $"INSERT INTO items (Name, Description, Price) VALUES ('{item.Name}', '{item.Description}', '{item.Price}')";
             DbUtils.ExecuteNonQuery(query);
             return Ok("Item added successfully");
         }
 
 
         [HttpPut("{id}")]
-        public IActionResult UpdateItem(string id, Item item)
+        public IActionResult UpdateItem(int id, Item item)
         {
-            string query = $"UPDATE items SET Name='{item.Name}', Description='{item.Description}', Price='{item.Price}' WHERE Id='{id}'";
+            string query = $"UPDATE items SET Name='{item.Name}', Description='{item.Description}', Price='{item.Price}' WHERE Id={id}";
             DbUtils.ExecuteNonQuery(query);
             return Ok("Item updated successfully");
         }
 
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteItem(string id)
+        public IActionResult DeleteItem(int id)
         {
-            string query = $"DELETE FROM items WHERE Id='{id}'";
+            string query = $"DELETE FROM items WHERE Id={id}";
             DbUtils.ExecuteNonQuery(query);
             return Ok("Item deleted successfully");
         }
