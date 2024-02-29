@@ -22,6 +22,10 @@ namespace serverSide.Controllers
             //insert order items
             string selectCartItems = $"SELECT * FROM cart_items WHERE CustomerId={order.CustomerId}";
             List<CartItem> cartItems = DbUtils.ExecuteSelectQuery<CartItem>(selectCartItems);
+            if (cartItems.Count == 0)
+            {
+                return BadRequest("No items in cart");
+            }
 
             cartItems.ForEach(cartItem =>
             {

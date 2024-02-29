@@ -55,7 +55,6 @@ namespace serverSide.Utils
             return insertedId;
         }
 
-
         //public static T MapToObject<T>(MySqlDataReader reader) where T : new()
         //{
         //    T obj = new T();
