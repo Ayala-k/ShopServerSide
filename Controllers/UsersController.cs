@@ -65,11 +65,21 @@ namespace serverSide.Controllers
 
 
         [HttpPut("{id}")]
-        public IActionResult UpdateUser(int id, User user)//not includes password change!
+        public IActionResult UpdateUser(int id, User user)
         {
             string query = $"UPDATE users SET Name='{user.Name}', Role='{user.Role}' WHERE Id={id}";
             DbUtils.ExecuteNonQuery(query);
             return Ok("User updated successfully");
+        }
+
+
+        [HttpPut("changePassword/{id}")]
+        public IActionResult ChangePassword(int id, [FromBody] string newPassword)
+        {
+            string hashedPassword = PasswordHashUtil.HashPassword(newPassword);
+            string query = $"UPDATE users SET Password='{hashedPassword}' WHERE Id={id}";
+            DbUtils.ExecuteNonQuery(query);
+            return Ok("Password updated successfully");
         }
 
 
