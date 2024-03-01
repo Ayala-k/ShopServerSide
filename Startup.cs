@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 using System.Text;
 
 namespace serverSide
@@ -50,6 +52,16 @@ namespace serverSide
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]))
                 };
             });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminPolicy", policy =>
+                    policy.Requirements.Add(new AdminAuthorizationRequirement()));
+            });
+
+            // Register the AdminAuthorizationHandler as a singleton
+            services.AddSingleton<IAuthorizationHandler, AdminAuthorizationHandler>();
+
             services.AddControllersWithViews();
 
         }
@@ -94,6 +106,24 @@ namespace serverSide
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
             });
+        }
+    }
+    public class AdminAuthorizationRequirement : IAuthorizationRequirement { }
+
+    public class AdminAuthorizationHandler : AuthorizationHandler<AdminAuthorizationRequirement>
+    {
+        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, AdminAuthorizationRequirement requirement)
+        {
+            if (!context.User.HasClaim(c => c.Type == ClaimTypes.Role && c.Value == "Admin"))
+            {
+                context.Fail(); // Deny access if the role claim is not "admin"
+            }
+            else
+            {
+                context.Succeed(requirement); // Allow access if the role claim is "admin"
+            }
+
+            return Task.CompletedTask;
         }
     }
 }
