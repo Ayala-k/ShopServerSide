@@ -1,4 +1,5 @@
 ﻿using Microsoft.IdentityModel.Tokens;
+using serverSide.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -7,7 +8,7 @@ namespace serverSide.Utils
 {
     public static class TokenGenerationUtil
     {
-        public static string GenerateJwtToken(int userId, IConfiguration _configuration)
+        public static string GenerateJwtToken(int userId, Roles role, IConfiguration _configuration)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
@@ -15,7 +16,8 @@ namespace serverSide.Utils
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+            new Claim(ClaimTypes.Role, role.ToString()) // Add role claim
                 }),
                 Expires = DateTime.UtcNow.AddHours(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
@@ -29,5 +31,6 @@ namespace serverSide.Utils
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
+
     }
 }

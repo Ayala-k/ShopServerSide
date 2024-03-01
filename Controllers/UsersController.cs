@@ -49,7 +49,7 @@ namespace serverSide.Controllers
             try
             {
                 int insertedUserId = DbUtils.ExecuteNonQuery(query);
-                var token = TokenGenerationUtil.GenerateJwtToken(insertedUserId, _configuration);
+                var token = TokenGenerationUtil.GenerateJwtToken(insertedUserId, (Roles)user.Role, _configuration);
                 return Ok(new { Token = token });
             }
             catch (MySql.Data.MySqlClient.MySqlException ex)
@@ -67,7 +67,7 @@ namespace serverSide.Controllers
             List<User> userDetails = DbUtils.ExecuteSelectQuery<User>(query);
             if (hashedPassword == userDetails[0].Password)
             {
-                var token = TokenGenerationUtil.GenerateJwtToken((int)userDetails[0].Id,_configuration);
+                var token = TokenGenerationUtil.GenerateJwtToken((int)userDetails[0].Id, (Roles)userDetails[0].Role, _configuration);
                 return Ok(new { Token = token });
             }
             else
