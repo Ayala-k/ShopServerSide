@@ -48,8 +48,9 @@ namespace serverSide.Controllers
             string query = $"INSERT INTO users (Name, Role, Password) VALUES ('{user.Name}', '{user.Role}','{hashedPassword}')";
             try
             {
-                DbUtils.ExecuteNonQuery(query);
-                return Ok("User added successfully");
+                int insertedUserId = DbUtils.ExecuteNonQuery(query);
+                var token = TokenGenerationUtil.GenerateJwtToken(insertedUserId, _configuration);
+                return Ok(new { Token = token });
             }
             catch (MySql.Data.MySqlClient.MySqlException ex)
             {
@@ -66,7 +67,7 @@ namespace serverSide.Controllers
             List<User> userDetails = DbUtils.ExecuteSelectQuery<User>(query);
             if (hashedPassword == userDetails[0].Password)
             {
-                var token = GenerateJwtToken((int)userDetails[0].Id);
+                var token = TokenGenerationUtil.GenerateJwtToken((int)userDetails[0].Id,_configuration);
                 return Ok(new { Token = token });
             }
             else
@@ -75,28 +76,7 @@ namespace serverSide.Controllers
             }
         }
 
-        private string GenerateJwtToken(int userId)
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new Claim[]
-                {
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
-                }),
-                Expires = DateTime.UtcNow.AddHours(1),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
-                // Add audience and issuer claims
-                Claims = new Dictionary<string, object>
-        {
-            { JwtRegisteredClaimNames.Aud, _configuration["Jwt:Audience"] },
-            { JwtRegisteredClaimNames.Iss, _configuration["Jwt:Issuer"] }
-        }
-            };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
-        }
+        
 
 
         [HttpPut("{id}")]
