@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using serverSide.Authorization;
 using System.Security.Claims;
 using System.Text;
 
@@ -108,22 +109,5 @@ namespace serverSide
             });
         }
     }
-    public class AdminAuthorizationRequirement : IAuthorizationRequirement { }
-
-    public class AdminAuthorizationHandler : AuthorizationHandler<AdminAuthorizationRequirement>
-    {
-        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, AdminAuthorizationRequirement requirement)
-        {
-            if (!context.User.HasClaim(c => c.Type == ClaimTypes.Role && c.Value == "Admin"))
-            {
-                context.Fail(); // Deny access if the role claim is not "admin"
-            }
-            else
-            {
-                context.Succeed(requirement); // Allow access if the role claim is "admin"
-            }
-
-            return Task.CompletedTask;
-        }
-    }
+    
 }
