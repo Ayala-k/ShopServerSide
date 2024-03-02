@@ -81,16 +81,20 @@ public class UsersController : ControllerBase
             user.Role = Roles.Customer;
             string hashedPassword = PasswordHashUtil.HashPassword(user.Password);
             string query = $"INSERT INTO users (Name, Role, Password) VALUES ('{user.Name}', '{user.Role}','{hashedPassword}')";
-            try
-            {
+            //try
+            //{
                 int insertedUserId = DbUtils.ExecuteNonQuery(query);
                 var token = TokenGenerationUtil.GenerateJwtToken(insertedUserId, (Roles)user.Role, _configuration);
                 return Ok(new { Token = token });
-            }
-            catch (MySql.Data.MySqlClient.MySqlException ex)
-            {
-                return Conflict("User name already exists");
-            }
+            //}
+            //catch (MySql.Data.MySqlClient.MySqlException ex) when (ex.Number == 1062)
+            //{
+            //    return Conflict("User name already exists");
+            //}
+        }
+        catch (DataAlreadyExistsException)
+        {
+            return Conflict("User name already exists");
         }
         catch (InternalDataBaseException)
         {
@@ -147,6 +151,10 @@ public class UsersController : ControllerBase
             DbUtils.ExecuteNonQuery(query);
             return Ok("User updated successfully");
 
+        }
+        catch (DataAlreadyExistsException)
+        {
+            return Conflict("User name already exists");
         }
         catch (InternalDataBaseException)
         {

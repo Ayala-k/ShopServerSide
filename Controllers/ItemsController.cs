@@ -71,6 +71,10 @@ public class ItemsController : ControllerBase
             DbUtils.ExecuteNonQuery(query);
             return Ok("Item added successfully");
         }
+        catch (DataAlreadyExistsException ex)
+        {
+            return Conflict(ex.Message);
+        }
         catch (InternalDataBaseException)
         {
             return StatusCode(500, "Internal Data Base Error");
@@ -91,6 +95,10 @@ public class ItemsController : ControllerBase
             string query = $"UPDATE items SET Name='{item.Name}', Description='{item.Description}', Price='{item.Price}', Category='{item.Category}' WHERE Id={id}";
             DbUtils.ExecuteNonQuery(query);
             return Ok("Item updated successfully");
+        }
+        catch (DataAlreadyExistsException)
+        {
+            return Conflict("User name already exists");
         }
         catch (InternalDataBaseException)
         {

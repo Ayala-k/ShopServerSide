@@ -55,6 +55,10 @@ public class OrderController : ControllerBase
         {
             return NotFound("No items in cart");
         }
+        catch (DataAlreadyExistsException)
+        {
+            return Conflict("User name already exists");
+        }
         catch (InternalDataBaseException)
         {
             return StatusCode(500, "Internal Data Base Error");

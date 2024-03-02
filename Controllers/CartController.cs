@@ -48,7 +48,7 @@ public class CartController : ControllerBase
             {
                 DbUtils.ExecuteNonQuery(query);
             }
-            catch (MySql.Data.MySqlClient.MySqlException ex)
+            catch (DataAlreadyExistsException)
             {
                 string selectQuery = $"SELECT * FROM cart_items WHERE CustomerId={item.CustomerId} AND ItemId={item.ItemId}";
                 List<CartItem> previousItem = DbUtils.ExecuteSelectQuery<CartItem>(selectQuery);

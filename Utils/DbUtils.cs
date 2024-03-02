@@ -71,6 +71,10 @@ public static class DbUtils
 
             return insertedId;
         }
+        catch (MySql.Data.MySqlClient.MySqlException ex) when (ex.Number == 1062)
+        {
+            throw new DataAlreadyExistsException("Data already exists");
+        }
         catch (Exception ex)
         {
             throw new InternalDataBaseException();
