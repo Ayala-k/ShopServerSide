@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using serverSide.Models;
 using serverSide.Utils;
@@ -10,6 +11,7 @@ namespace serverSide.Controllers
     [ApiController]
     public class OrderController : ControllerBase
     {
+        [Authorize]
         [HttpPost]
         public IActionResult CreateOrder(Order order)
         {
@@ -47,6 +49,7 @@ namespace serverSide.Controllers
         }
 
 
+        [Authorize]
         [HttpGet("{customerId}")]
         public IActionResult GetCustomersOrders(int customerId)
         {

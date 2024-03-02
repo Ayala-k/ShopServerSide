@@ -10,8 +10,7 @@ namespace serverSide.Controllers
     [ApiController]
     public class ItemsController : ControllerBase
     {
-        //[Authorize]
-        [Authorize(Policy = "AdminPolicy")]
+        [Authorize]
         [HttpGet]
         public IActionResult GetAllItems()
         {
@@ -21,6 +20,7 @@ namespace serverSide.Controllers
         }
 
 
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet("{id}")]
         public IActionResult GetItemById(int id)
         {
@@ -30,6 +30,7 @@ namespace serverSide.Controllers
         }
 
 
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPost]
         public IActionResult AddItem(Item item)
         {
@@ -39,6 +40,7 @@ namespace serverSide.Controllers
         }
 
 
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPut("{id}")]
         public IActionResult UpdateItem(int id, Item item)
         {
@@ -48,6 +50,7 @@ namespace serverSide.Controllers
         }
 
 
+        [Authorize(Policy = "AdminPolicy")]
         [HttpDelete("{id}")]
         public IActionResult DeleteItem(int id)
         {

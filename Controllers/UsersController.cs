@@ -21,6 +21,7 @@ namespace serverSide.Controllers
             _configuration = configuration;
         }
 
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet]
         public IActionResult GetAllUsers()
         {
@@ -31,6 +32,7 @@ namespace serverSide.Controllers
         }
 
 
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet("{id}")]
         public IActionResult GetUserById(int id)
         {
@@ -38,8 +40,8 @@ namespace serverSide.Controllers
             List<User> user = DbUtils.ExecuteSelectQuery<User>(query);
             return Ok(user);
         }
-        
 
+        [AllowAnonymous]
         [HttpPost("signup")]
         public IActionResult SignUp(User user)
         {
@@ -59,6 +61,7 @@ namespace serverSide.Controllers
         }
 
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public IActionResult LogIn(UserLogIn user)
         {
@@ -77,6 +80,7 @@ namespace serverSide.Controllers
         }
 
 
+        [Authorize]
         [HttpPut("{id}")]
         public IActionResult UpdateUser(int id, User user)
         {
@@ -86,6 +90,7 @@ namespace serverSide.Controllers
         }
 
 
+        [Authorize]
         [HttpPut("changePassword/{id}")]
         public IActionResult ChangePassword(int id, [FromBody] string newPassword)
         {
@@ -96,6 +101,7 @@ namespace serverSide.Controllers
         }
 
 
+        [Authorize(Policy = "AdminPolicy")]
         [HttpDelete("{id}")]
         public IActionResult DeleteUser(int id)
         {

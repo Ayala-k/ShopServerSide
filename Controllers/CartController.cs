@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using serverSide.Models;
 using serverSide.Utils;
@@ -9,17 +10,18 @@ namespace serverSide.Controllers
     [ApiController]
     public class CartController : ControllerBase
     {
+        [Authorize]
         [HttpGet("{customerId}")]
         public IActionResult GetAllCustomersCartItems(int customerId)
         {
             string query = $"SELECT * FROM cart_items WHERE CustomerId={customerId}";
             List<CartItem> items = DbUtils.ExecuteSelectQuery<CartItem>(query);
             double totalPrice = items.Sum(item => item.Amount * GetPricePerItem(item.ItemId));
-            //return Ok(items);
             return Ok(new { items=items,price=totalPrice});
         }
 
 
+        [Authorize]
         [HttpPost]
         public IActionResult AddToCart(CartItem item)
         {
@@ -41,6 +43,7 @@ namespace serverSide.Controllers
         }
 
 
+        [Authorize]
         [HttpPut("{CustomerId}/{ItemId}")]
         public IActionResult UpdateItem(int CustomerId, int ItemId, [FromBody] int amount)
         {
@@ -50,6 +53,7 @@ namespace serverSide.Controllers
         }
 
 
+        [Authorize]
         [HttpDelete("{CustomerId}/{ItemId}")]
         public IActionResult DeleteFromCart(int CustomerId, int ItemId)
         {
