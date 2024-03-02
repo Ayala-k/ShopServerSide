@@ -1,4 +1,5 @@
 ﻿using MySql.Data.MySqlClient;
+using serverSide.Exceptions;
 using serverSide.Models;
 using System;
 using System.Collections.Generic;
@@ -14,59 +15,67 @@ public static class DbUtils
     {
         List<T> results = new List<T>();
 
-        using (MySqlConnection connection = new MySqlConnection(connectionString))
+        try
         {
-            connection.Open();
 
-            using (MySqlCommand command = new MySqlCommand(query, connection))
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                using (MySqlDataReader reader = command.ExecuteReader())
+                connection.Open();
+
+                using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
-                    while (reader.Read())
+                    using (MySqlDataReader reader = command.ExecuteReader())
                     {
-                        T result = MapToObject<T>(reader);
-                        results.Add(result);
+                        while (reader.Read())
+                        {
+                            T result = MapToObject<T>(reader);
+                            results.Add(result);
+                        }
                     }
                 }
             }
         }
+        catch (Exception ex)
+        {
+            throw new InternalDataBaseException();
+        }
+
+        if (results.Count == 0)
+        {
+            throw new DataNotFoundException("Data not found");
+        }
 
         return results;
+
     }
 
     public static int ExecuteNonQuery(string query)
     {
-        int insertedId = -1; // Default value if no ID is retrieved
-
-        using (MySqlConnection connection = new MySqlConnection(connectionString))
+        try
         {
-            connection.Open();
+            int insertedId = -1; // Default value if no ID is retrieved
 
-            using (MySqlCommand command = new MySqlCommand(query, connection))
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                // Execute the query
-                command.ExecuteNonQuery();
+                connection.Open();
 
-                // Retrieve the ID of the last inserted row
-                insertedId = (int)command.LastInsertedId;
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    // Execute the query
+                    command.ExecuteNonQuery();
+
+                    // Retrieve the ID of the last inserted row
+                    insertedId = (int)command.LastInsertedId;
+                }
             }
+
+            return insertedId;
         }
-
-        return insertedId;
+        catch (Exception ex)
+        {
+            throw new InternalDataBaseException();
+        }
     }
-
-    //public static T MapToObject<T>(MySqlDataReader reader) where T : new()
-    //{
-    //    T obj = new T();
-    //    foreach (var prop in typeof(T).GetProperties())
-    //    {
-    //        if (!reader.IsDBNull(reader.GetOrdinal(prop.Name)))
-    //        {
-    //            prop.SetValue(obj, reader[prop.Name]);
-    //        }
-    //    }
-    //    return obj;
-    //}
 
     public static T MapToObject<T>(MySqlDataReader reader) where T : new()
     {
@@ -80,15 +89,12 @@ public static class DbUtils
 
                 try
                 {
-                    // Check if property type is nullable
                     if (Nullable.GetUnderlyingType(prop.PropertyType) != null)
                     {
-                        // Convert DBNull to null for nullable types
                         value = Convert.ChangeType(value, propType);
                     }
                     else
                     {
-                        // Convert DBNull to default value for non-nullable types
                         value = value == DBNull.Value ? Activator.CreateInstance(propType) : Convert.ChangeType(value, propType);
                     }
                 }
@@ -106,11 +112,6 @@ public static class DbUtils
                     {
                         value = (InstrumentalCategory)Enum.Parse(typeof(InstrumentalCategory), value.ToString());
                     }
-                    //if (prop.PropertyType.IsEnum)
-                    //{
-                    //    // Convert the value to the enum type
-                    //    value = Enum.Parse(prop.PropertyType, value.ToString());
-                    //}
                 }
                 prop.SetValue(obj, value);
             }
