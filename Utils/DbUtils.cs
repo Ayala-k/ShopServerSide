@@ -4,118 +4,117 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 
-namespace serverSide.Utils
+namespace serverSide.Utils;
+
+public static class DbUtils
 {
-    public static class DbUtils
+    private static readonly string connectionString = Environment.GetEnvironmentVariable("ConnectionString");
+
+    public static List<T> ExecuteSelectQuery<T>(string query) where T : new()
     {
-        private static readonly string connectionString = Environment.GetEnvironmentVariable("ConnectionString");
+        List<T> results = new List<T>();
 
-        public static List<T> ExecuteSelectQuery<T>(string query) where T : new()
+        using (MySqlConnection connection = new MySqlConnection(connectionString))
         {
-            List<T> results = new List<T>();
+            connection.Open();
 
-            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            using (MySqlCommand command = new MySqlCommand(query, connection))
             {
-                connection.Open();
-
-                using (MySqlCommand command = new MySqlCommand(query, connection))
+                using (MySqlDataReader reader = command.ExecuteReader())
                 {
-                    using (MySqlDataReader reader = command.ExecuteReader())
+                    while (reader.Read())
                     {
-                        while (reader.Read())
-                        {
-                            T result = MapToObject<T>(reader);
-                            results.Add(result);
-                        }
+                        T result = MapToObject<T>(reader);
+                        results.Add(result);
                     }
                 }
             }
-
-            return results;
         }
 
-        public static int ExecuteNonQuery(string query)
+        return results;
+    }
+
+    public static int ExecuteNonQuery(string query)
+    {
+        int insertedId = -1; // Default value if no ID is retrieved
+
+        using (MySqlConnection connection = new MySqlConnection(connectionString))
         {
-            int insertedId = -1; // Default value if no ID is retrieved
+            connection.Open();
 
-            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            using (MySqlCommand command = new MySqlCommand(query, connection))
             {
-                connection.Open();
+                // Execute the query
+                command.ExecuteNonQuery();
 
-                using (MySqlCommand command = new MySqlCommand(query, connection))
-                {
-                    // Execute the query
-                    command.ExecuteNonQuery();
-
-                    // Retrieve the ID of the last inserted row
-                    insertedId = (int)command.LastInsertedId;
-                }
+                // Retrieve the ID of the last inserted row
+                insertedId = (int)command.LastInsertedId;
             }
-
-            return insertedId;
         }
 
-        //public static T MapToObject<T>(MySqlDataReader reader) where T : new()
-        //{
-        //    T obj = new T();
-        //    foreach (var prop in typeof(T).GetProperties())
-        //    {
-        //        if (!reader.IsDBNull(reader.GetOrdinal(prop.Name)))
-        //        {
-        //            prop.SetValue(obj, reader[prop.Name]);
-        //        }
-        //    }
-        //    return obj;
-        //}
+        return insertedId;
+    }
 
-        public static T MapToObject<T>(MySqlDataReader reader) where T : new()
+    //public static T MapToObject<T>(MySqlDataReader reader) where T : new()
+    //{
+    //    T obj = new T();
+    //    foreach (var prop in typeof(T).GetProperties())
+    //    {
+    //        if (!reader.IsDBNull(reader.GetOrdinal(prop.Name)))
+    //        {
+    //            prop.SetValue(obj, reader[prop.Name]);
+    //        }
+    //    }
+    //    return obj;
+    //}
+
+    public static T MapToObject<T>(MySqlDataReader reader) where T : new()
+    {
+        T obj = new T();
+        foreach (var prop in typeof(T).GetProperties())
         {
-            T obj = new T();
-            foreach (var prop in typeof(T).GetProperties())
+            if (!reader.IsDBNull(reader.GetOrdinal(prop.Name)))
             {
-                if (!reader.IsDBNull(reader.GetOrdinal(prop.Name)))
-                {
-                    object value = reader[prop.Name];
-                    Type propType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
+                object value = reader[prop.Name];
+                Type propType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
 
-                    try
+                try
+                {
+                    // Check if property type is nullable
+                    if (Nullable.GetUnderlyingType(prop.PropertyType) != null)
                     {
-                        // Check if property type is nullable
-                        if (Nullable.GetUnderlyingType(prop.PropertyType) != null)
-                        {
-                            // Convert DBNull to null for nullable types
-                            value = Convert.ChangeType(value, propType);
-                        }
-                        else
-                        {
-                            // Convert DBNull to default value for non-nullable types
-                            value = value == DBNull.Value ? Activator.CreateInstance(propType) : Convert.ChangeType(value, propType);
-                        }
+                        // Convert DBNull to null for nullable types
+                        value = Convert.ChangeType(value, propType);
                     }
-                    catch (System.InvalidCastException ex)
+                    else
                     {
-                        if (typeof(T) == typeof(User))
-                        {
-                            value = (Roles)Enum.Parse(typeof(Roles), value.ToString());
-                        }
-                        if (typeof(T) == typeof(Order))
-                        {
-                            value = (OrderStatus)Enum.Parse(typeof(OrderStatus), value.ToString());
-                        }
-                        if (typeof(T) == typeof(Item))
-                        {
-                            value = (InstrumentalCategory)Enum.Parse(typeof(InstrumentalCategory), value.ToString());
-                        }
-                        //if (prop.PropertyType.IsEnum)
-                        //{
-                        //    // Convert the value to the enum type
-                        //    value = Enum.Parse(prop.PropertyType, value.ToString());
-                        //}
+                        // Convert DBNull to default value for non-nullable types
+                        value = value == DBNull.Value ? Activator.CreateInstance(propType) : Convert.ChangeType(value, propType);
                     }
-                    prop.SetValue(obj, value);
                 }
+                catch (System.InvalidCastException ex)
+                {
+                    if (typeof(T) == typeof(User))
+                    {
+                        value = (Roles)Enum.Parse(typeof(Roles), value.ToString());
+                    }
+                    if (typeof(T) == typeof(Order))
+                    {
+                        value = (OrderStatus)Enum.Parse(typeof(OrderStatus), value.ToString());
+                    }
+                    if (typeof(T) == typeof(Item))
+                    {
+                        value = (InstrumentalCategory)Enum.Parse(typeof(InstrumentalCategory), value.ToString());
+                    }
+                    //if (prop.PropertyType.IsEnum)
+                    //{
+                    //    // Convert the value to the enum type
+                    //    value = Enum.Parse(prop.PropertyType, value.ToString());
+                    //}
+                }
+                prop.SetValue(obj, value);
             }
-            return obj;
         }
+        return obj;
     }
 }
