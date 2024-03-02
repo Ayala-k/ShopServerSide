@@ -33,8 +33,9 @@ namespace serverSide.Controllers
                 OrderId = insertedOrderId,
                 ItemId = cartItem.ItemId,
                 Amount = cartItem.Amount,
+                PricePerItem=GetPricePerItem(cartItem.ItemId)
                 };
-                string insertOrderItemQuery = $"INSERT INTO order_items (OrderId,ItemId,Amount) VALUES ({orderItem.OrderId},{orderItem.ItemId},{orderItem.Amount})";
+                string insertOrderItemQuery = $"INSERT INTO order_items (OrderId,ItemId,Amount,PricePerItem) VALUES ({orderItem.OrderId},{orderItem.ItemId},{orderItem.Amount},{orderItem.PricePerItem})";
                 DbUtils.ExecuteNonQuery(insertOrderItemQuery);
             });
 
@@ -57,15 +58,23 @@ namespace serverSide.Controllers
             {
             string orderItemsQuery = $"SELECT * FROM order_items WHERE OrderId={order.Id}";
             List<OrderItem> ordersItems = DbUtils.ExecuteSelectQuery<OrderItem>(orderItemsQuery);
-            var orderObject = new
-            {
-                orderDetails = order,
-                orderItems = ordersItems
+                var orderObject = new
+                {
+                    orderDetails = order,
+                    orderItems = ordersItems,
+                    price = ordersItems.Sum(item => item.Amount * GetPricePerItem(item.ItemId))
             };
             orders.Add(orderObject);
             });
 
             return Ok(orders);
+        }
+
+        private double GetPricePerItem(int itemId)
+        {
+            string query = $"SELECT * FROM items WHERE Id={itemId}";
+            List<Item> item = DbUtils.ExecuteSelectQuery<Item>(query);
+            return item[0].Price;
         }
     }
 }

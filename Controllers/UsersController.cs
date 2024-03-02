@@ -76,8 +76,6 @@ namespace serverSide.Controllers
             }
         }
 
-        
-
 
         [HttpPut("{id}")]
         public IActionResult UpdateUser(int id, User user)

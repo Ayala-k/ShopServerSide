@@ -14,7 +14,9 @@ namespace serverSide.Controllers
         {
             string query = $"SELECT * FROM cart_items WHERE CustomerId={customerId}";
             List<CartItem> items = DbUtils.ExecuteSelectQuery<CartItem>(query);
-            return Ok(items);
+            double totalPrice = items.Sum(item => item.Amount * GetPricePerItem(item.ItemId));
+            //return Ok(items);
+            return Ok(new { items=items,price=totalPrice});
         }
 
 
@@ -22,7 +24,6 @@ namespace serverSide.Controllers
         public IActionResult AddToCart(CartItem item)
         {
             string query = $"INSERT INTO cart_items (CustomerId,ItemId,Amount) VALUES ({item.CustomerId},{item.ItemId},{item.Amount})";
-            Console.Write(query);
             try
             {
                 DbUtils.ExecuteNonQuery(query);
@@ -55,6 +56,13 @@ namespace serverSide.Controllers
             string query = $"DELETE FROM cart_items WHERE CustomerId={CustomerId} AND ItemId={ItemId}";
             DbUtils.ExecuteNonQuery(query);
             return Ok("Item deleted successfully");
+        }
+
+        private double GetPricePerItem(int itemId)
+        {
+            string query = $"SELECT * FROM items WHERE Id={itemId}";
+            List<Item> item= DbUtils.ExecuteSelectQuery<Item>(query);
+            return item[0].Price;
         }
 
     }
