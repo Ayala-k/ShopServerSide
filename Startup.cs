@@ -80,6 +80,10 @@ public class Startup
         }
 
         app.UseHttpsRedirection();
+        app.UseCors(x => x
+           .AllowAnyOrigin()
+           .AllowAnyMethod()
+           .AllowAnyHeader());
         app.UseStaticFiles();
 
 

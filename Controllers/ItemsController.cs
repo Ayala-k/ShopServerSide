@@ -19,7 +19,15 @@ public class ItemsController : ControllerBase
         {
             string query = "SELECT * FROM items";
             List<Item> items = DbUtils.ExecuteSelectQuery<Item>(query);
-            return Ok(items);
+            var itemDtos = items.Select(item => new
+            {
+                Id = item.Id,
+                Name = item.Name,
+                Description = item.Description,
+                Price = item.Price,
+                Category = item.Category.ToString() // Convert enum to string
+            }).ToList();
+            return Ok(itemDtos);
         }
         catch (DataNotFoundException ex)
         {
