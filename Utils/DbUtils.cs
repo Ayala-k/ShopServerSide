@@ -37,7 +37,7 @@ public static class DbUtils
         }
         catch (Exception ex)
         {
-            throw new InternalDataBaseException();
+            throw new InternalDataBaseException(ex.Message);
         }
 
         if (results.Count == 0)
@@ -114,7 +114,7 @@ public static class DbUtils
                     {
                         value = (OrderStatus)Enum.Parse(typeof(OrderStatus), value.ToString());
                     }
-                    if (typeof(T) == typeof(Item))
+                    if (typeof(T) == typeof(Item)|| typeof(T) == typeof(CartItemOut))
                     {
                         value = (InstrumentalCategory)Enum.Parse(typeof(InstrumentalCategory), value.ToString());
                     }

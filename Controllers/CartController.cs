@@ -21,17 +21,20 @@ public class CartController : ControllerBase
 
         try
         {
-            string query = $"SELECT * FROM cart_items  WHERE CustomerId={userId}";
-            List<CartItem> items = DbUtils.ExecuteSelectQuery<CartItem>(query);
-            List<Object> list=new List<Object>();
-            items.ForEach(item =>
-            {
-                string itemDetailsQuery = $"SELECT * FROM items WHERE Id={item.ItemId}";
-                List<Item> itemDetails=DbUtils.ExecuteSelectQuery<Item>(itemDetailsQuery);
-                list.Add(new { item, itemDetails=itemDetails[0] });
-            });
-            double totalPrice = items.Sum(item => item.Amount * GetPricePerItem(item.ItemId));
-            return Ok(new { items = list, price = totalPrice });
+            //string query = $"SELECT * FROM cart_items  WHERE CustomerId={userId}";
+            //List<CartItem> items = DbUtils.ExecuteSelectQuery<CartItem>(query);
+            //List<Object> list=new List<Object>();
+            //items.ForEach(item =>
+            //{
+            //    string itemDetailsQuery = $"SELECT * FROM items WHERE Id={item.ItemId}";
+            //    List<Item> itemDetails=DbUtils.ExecuteSelectQuery<Item>(itemDetailsQuery);
+            //    list.Add(new { item, itemDetails=itemDetails[0] });
+            //});
+            //double totalPrice = items.Sum(item => item.Amount * GetPricePerItem(item.ItemId));
+            //return Ok(new { items = list, price = totalPrice });
+            string query = $"SELECT Id,Name,Description,Price,Category,Amount FROM cart_items ci, items i WHERE ci.ItemId=i.Id AND CustomerId={userId};";
+            List<CartItemOut> items = DbUtils.ExecuteSelectQuery<CartItemOut>(query);
+            return Ok(items);
         }
         catch (DataNotFoundException ex)
         {

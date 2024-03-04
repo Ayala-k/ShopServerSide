@@ -6,3 +6,8 @@ public class CartItem
     public int ItemId { get; set; }
     public int Amount { get; set; }
 }
+
+
+public class CartItemOut : Item{
+    public int Amount { get; set; }
+}
