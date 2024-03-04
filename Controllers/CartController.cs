@@ -28,7 +28,7 @@ public class CartController : ControllerBase
             {
                 string itemDetailsQuery = $"SELECT * FROM items WHERE Id={item.ItemId}";
                 List<Item> itemDetails=DbUtils.ExecuteSelectQuery<Item>(itemDetailsQuery);
-                list.Add(new {item,itemDetails});
+                list.Add(new { item, itemDetails=itemDetails[0] });
             });
             double totalPrice = items.Sum(item => item.Amount * GetPricePerItem(item.ItemId));
             return Ok(new { items = list, price = totalPrice });
@@ -37,9 +37,9 @@ public class CartController : ControllerBase
         {
             return NotFound(ex.Message);
         }
-        catch (InternalDataBaseException)
+        catch (InternalDataBaseException ex)
         {
-            return StatusCode(500, "Internal Data Base Error");
+            return StatusCode(500, "Internal Data Base Error"+ ex.Message);
         }
         catch (Exception)
         {
