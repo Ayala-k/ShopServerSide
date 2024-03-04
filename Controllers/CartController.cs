@@ -40,24 +40,30 @@ public class CartController : ControllerBase
 
     [Authorize]
     [HttpPost]
-    public IActionResult AddToCart(CartItem item)
+    public IActionResult AddToCart([FromBody] int itemId)
     {
+        int userId=TokenUtils.ExtractUserId(User.Claims);
+        Console.WriteLine(itemId);
         try
         {
-            string query = $"INSERT INTO cart_items (CustomerId,ItemId,Amount) VALUES ({item.CustomerId},{item.ItemId},{item.Amount})";
+            string query = $"INSERT INTO cart_items (CustomerId,ItemId,Amount) VALUES ({userId},{itemId},{1})";
+            Console.WriteLine( query);
+
             try
             {
                 DbUtils.ExecuteNonQuery(query);
+                Console.WriteLine("after add",query);
+
             }
             catch (DataAlreadyExistsException)
             {
-                string selectQuery = $"SELECT * FROM cart_items WHERE CustomerId={item.CustomerId} AND ItemId={item.ItemId}";
+                string selectQuery = $"SELECT * FROM cart_items WHERE CustomerId={userId} AND ItemId={itemId}";
                 List<CartItem> previousItem = DbUtils.ExecuteSelectQuery<CartItem>(selectQuery);
                 int previousAmount = previousItem[0].Amount;
-                string updateQuery = $"UPDATE cart_items SET Amount={previousAmount + 1} WHERE CustomerId={item.CustomerId} AND ItemId={item.ItemId}";
+                string updateQuery = $"UPDATE cart_items SET Amount={previousAmount + 1} WHERE CustomerId={userId} AND ItemId={itemId}";
                 DbUtils.ExecuteNonQuery(updateQuery);
             }
-            return Ok("Item added successfully");
+            return Ok(new { message = "Item added successfully" });
         }
         catch (InternalDataBaseException)
         {
