@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using serverSide.Exceptions;
 using serverSide.Models;
 using serverSide.Utils;
+using System.Collections.Generic;
 using System.Security.Claims;
 
 namespace serverSide.Controllers;
@@ -13,15 +14,24 @@ namespace serverSide.Controllers;
 public class CartController : ControllerBase
 {
     [Authorize]
-    [HttpGet("{customerId}")]
-    public IActionResult GetAllCustomersCartItems(int customerId)
+    [HttpGet]
+    public IActionResult GetAllCustomersCartItems()
     {
+        int userId = TokenUtils.ExtractUserId(User.Claims);
+
         try
         {
-            string query = $"SELECT * FROM cart_items WHERE CustomerId={customerId}";
+            string query = $"SELECT * FROM cart_items  WHERE CustomerId={userId}";
             List<CartItem> items = DbUtils.ExecuteSelectQuery<CartItem>(query);
+            List<Object> list=new List<Object>();
+            items.ForEach(item =>
+            {
+                string itemDetailsQuery = $"SELECT * FROM items WHERE Id={item.ItemId}";
+                List<Item> itemDetails=DbUtils.ExecuteSelectQuery<Item>(itemDetailsQuery);
+                list.Add(new {item,itemDetails});
+            });
             double totalPrice = items.Sum(item => item.Amount * GetPricePerItem(item.ItemId));
-            return Ok(new { items = items, price = totalPrice });
+            return Ok(new { items = list, price = totalPrice });
         }
         catch (DataNotFoundException ex)
         {
@@ -43,17 +53,13 @@ public class CartController : ControllerBase
     public IActionResult AddToCart([FromBody] int itemId)
     {
         int userId=TokenUtils.ExtractUserId(User.Claims);
-        Console.WriteLine(itemId);
         try
         {
             string query = $"INSERT INTO cart_items (CustomerId,ItemId,Amount) VALUES ({userId},{itemId},{1})";
-            Console.WriteLine( query);
-
             try
             {
                 DbUtils.ExecuteNonQuery(query);
                 Console.WriteLine("after add",query);
-
             }
             catch (DataAlreadyExistsException)
             {

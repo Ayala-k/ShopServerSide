@@ -49,6 +49,48 @@ public static class DbUtils
 
     }
 
+    public static List<object> ExecuteSelectQueryWithoutType(string query)
+    {
+        List<object> results = new List<object>();
+
+        try
+        {
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            // Create an anonymous object with the column names and values
+                            var data = new Dictionary<string, object>();
+                            for (int i = 0; i < reader.FieldCount; i++)
+                            {
+                                data[reader.GetName(i)] = reader[i];
+                            }
+                            results.Add(data);
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new InternalDataBaseException();
+        }
+
+        if (results.Count == 0)
+        {
+            throw new DataNotFoundException("Data not found");
+        }
+
+        return results;
+    }
+
+
     public static int ExecuteNonQuery(string query)
     {
         try
