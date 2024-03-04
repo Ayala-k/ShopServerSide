@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using serverSide.Exceptions;
 using serverSide.Models;
 using serverSide.Utils;
+using System.Security.Claims;
 
 namespace serverSide.Controllers;
 
@@ -15,6 +16,10 @@ public class ItemsController : ControllerBase
     [HttpGet]
     public IActionResult GetAllItems()
     {
+        
+        //int userId=TokenUtils.ExtractUserId(User.Claims);
+        //    Console.WriteLine(userId);
+
         try
         {
             string query = "SELECT * FROM items";

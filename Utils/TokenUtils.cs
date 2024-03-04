@@ -6,7 +6,7 @@ using System.Text;
 
 namespace serverSide.Utils;
 
-public static class TokenGenerationUtil
+public static class TokenUtils
 {
     public static string GenerateJwtToken(int userId, Roles role, IConfiguration _configuration)
     {
@@ -30,6 +30,16 @@ public static class TokenGenerationUtil
         };
         var token = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(token);
+    }
+
+    public static int ExtractUserId(IEnumerable<Claim> claims)
+    {
+        int userId;
+        var userIdClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+        if (userIdClaim != null && int.TryParse(userIdClaim.Value, out userId))
+            return userId;
+        else
+            return 0;
     }
 
 }

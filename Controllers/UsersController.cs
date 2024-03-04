@@ -84,7 +84,7 @@ public class UsersController : ControllerBase
             //try
             //{
                 int insertedUserId = DbUtils.ExecuteNonQuery(query);
-                var token = TokenGenerationUtil.GenerateJwtToken(insertedUserId, (Roles)user.Role, _configuration);
+                var token = TokenUtils.GenerateJwtToken(insertedUserId, (Roles)user.Role, _configuration);
                 return Ok(new { Token = token });
             //}
             //catch (MySql.Data.MySqlClient.MySqlException ex) when (ex.Number == 1062)
@@ -118,7 +118,7 @@ public class UsersController : ControllerBase
             List<User> userDetails = DbUtils.ExecuteSelectQuery<User>(query);
             if (hashedPassword == userDetails[0].Password)
             {
-                var token = TokenGenerationUtil.GenerateJwtToken((int)userDetails[0].Id, (Roles)userDetails[0].Role, _configuration);
+                var token = TokenUtils.GenerateJwtToken((int)userDetails[0].Id, (Roles)userDetails[0].Role, _configuration);
                 return Ok(new { Token = token });
             }
             else

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using serverSide.Exceptions;
 using serverSide.Models;
 using serverSide.Utils;
+using System.Security.Claims;
 
 namespace serverSide.Controllers;
 
