@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Org.BouncyCastle.Asn1.X509;
 using serverSide.Exceptions;
 using serverSide.Models;
 using serverSide.Utils;
@@ -17,37 +18,11 @@ public class OrderController : ControllerBase
     public IActionResult CreateOrder()
     {
         int userId = TokenUtils.ExtractUserId(User.Claims);
-        Order order = new Order();  
         try
         {
-            order.Status = OrderStatus.OrderRecieved;
-
-            //insert order
-            string orderQuery = $"INSERT INTO orders (CustomerId, Status) VALUES ('{userId}', '{order.Status.ToString()}')";
-            int insertedOrderId = DbUtils.ExecuteNonQuery(orderQuery);
-
-            //insert order items
-            string selectCartItems = $"SELECT * FROM cart_items WHERE CustomerId={userId}";
-            List<CartItem> cartItems = DbUtils.ExecuteSelectQuery<CartItem>(selectCartItems);
-            
-
-            cartItems.ForEach(cartItem =>
-            {
-                OrderItem orderItem = new OrderItem()
-                {
-                    OrderId = insertedOrderId,
-                    ItemId = cartItem.ItemId,
-                    Amount = cartItem.Amount,
-                    PricePerItem = GetPricePerItem(cartItem.ItemId)
-                };
-                string insertOrderItemQuery = $"INSERT INTO order_items (OrderId,ItemId,Amount,PricePerItem) VALUES ({orderItem.OrderId},{orderItem.ItemId},{orderItem.Amount},{orderItem.PricePerItem})";
-                DbUtils.ExecuteNonQuery(insertOrderItemQuery);
-            });
-
-            //delete cart items
-            string deleteCartItemsQuery = $"DELETE FROM cart_items WHERE CustomerId={userId}";
-            DbUtils.ExecuteNonQuery(deleteCartItemsQuery);
-
+            int insertedOrderId = insertOrder(userId);
+            insertOrderItems(userId, insertedOrderId);
+            deleteCartItems(userId);
             return Ok( new { message= "Order created successfully" });
         }
         catch (DataNotFoundException ex)
@@ -66,6 +41,38 @@ public class OrderController : ControllerBase
         {
             return StatusCode(500, "Internal Server Error");
         }
+    }
+
+    private int insertOrder(int userId)
+    {
+        string orderQuery = $"INSERT INTO orders (CustomerId, Status) VALUES ('{userId}', '{OrderStatus.OrderRecieved.ToString()}')";
+        int insertedOrderId = DbUtils.ExecuteNonQuery(orderQuery);
+        return insertedOrderId;
+    }
+
+    private void insertOrderItems(int userId,int orderId)
+    {
+        string selectCartItems = $"SELECT * FROM cart_items WHERE CustomerId={userId}";
+        List<CartItem> cartItems = DbUtils.ExecuteSelectQuery<CartItem>(selectCartItems);
+
+        cartItems.ForEach(cartItem =>
+        {
+            OrderItem orderItem = new OrderItem()
+            {
+                OrderId = orderId,
+                ItemId = cartItem.ItemId,
+                Amount = cartItem.Amount,
+                PricePerItem = GetPricePerItem(cartItem.ItemId)
+            };
+            string insertOrderItemQuery = $"INSERT INTO order_items (OrderId,ItemId,Amount,PricePerItem) VALUES ({orderItem.OrderId},{orderItem.ItemId},{orderItem.Amount},{orderItem.PricePerItem})";
+            DbUtils.ExecuteNonQuery(insertOrderItemQuery);
+        });
+    }
+
+    private void deleteCartItems(int userId)
+    {
+        string deleteCartItemsQuery = $"DELETE FROM cart_items WHERE CustomerId={userId}";
+        DbUtils.ExecuteNonQuery(deleteCartItemsQuery);
     }
 
 
