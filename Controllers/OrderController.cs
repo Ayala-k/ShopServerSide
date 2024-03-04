@@ -14,23 +14,22 @@ public class OrderController : ControllerBase
 {
     [Authorize]
     [HttpPost]
-    public IActionResult CreateOrder(Order order)
+    public IActionResult CreateOrder()
     {
+        int userId = TokenUtils.ExtractUserId(User.Claims);
+        Order order = new Order();  
         try
         {
             order.Status = OrderStatus.OrderRecieved;
 
             //insert order
-            string orderQuery = $"INSERT INTO orders (CustomerId, Status) VALUES ('{order.CustomerId}', '{order.Status.ToString()}')";
+            string orderQuery = $"INSERT INTO orders (CustomerId, Status) VALUES ('{userId}', '{order.Status.ToString()}')";
             int insertedOrderId = DbUtils.ExecuteNonQuery(orderQuery);
 
             //insert order items
-            string selectCartItems = $"SELECT * FROM cart_items WHERE CustomerId={order.CustomerId}";
+            string selectCartItems = $"SELECT * FROM cart_items WHERE CustomerId={userId}";
             List<CartItem> cartItems = DbUtils.ExecuteSelectQuery<CartItem>(selectCartItems);
-            //if (cartItems.Count == 0)
-            //{
-            //    return BadRequest("No items in cart");
-            //}
+            
 
             cartItems.ForEach(cartItem =>
             {
@@ -46,10 +45,10 @@ public class OrderController : ControllerBase
             });
 
             //delete cart items
-            string deleteCartItemsQuery = $"DELETE FROM cart_items WHERE CustomerId={order.CustomerId}";
+            string deleteCartItemsQuery = $"DELETE FROM cart_items WHERE CustomerId={userId}";
             DbUtils.ExecuteNonQuery(deleteCartItemsQuery);
 
-            return Ok("Order created successfully");
+            return Ok( new { message= "Order created successfully" });
         }
         catch (DataNotFoundException ex)
         {
